@@ -7,7 +7,7 @@ import (
 	"github.com/urmd39/product_management/entities"
 )
 
-func GetListProduct() []*entities.Product {
+func GetListProduct() []entities.Product {
 	db := Connected()
 	defer db.Close()
 	db.Exec(`set search_path='product'`)
@@ -19,9 +19,9 @@ func GetListProduct() []*entities.Product {
 	}
 	defer rows.Close()
 
-	listProduct := make([]*entities.Product, 0)
+	listProduct := make([]entities.Product, 0)
 	for rows.Next() {
-		var pd *entities.Product
+		var pd entities.Product
 		query_err := rows.Scan(&pd.Id, &pd.Name, &pd.Currency_unit_id, &pd.Description,
 			&pd.Updated_time, &pd.Purchase_price, &pd.Selling_price)
 		if query_err != nil {
@@ -29,7 +29,7 @@ func GetListProduct() []*entities.Product {
 		}
 		listProduct = append(listProduct, pd)
 	}
-	fmt.Println(listProduct)
+	// fmt.Println(listProduct)
 	return listProduct
 }
 

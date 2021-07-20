@@ -1,42 +1,77 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
-	"github.com/urmd39/product_management/apis"
+	"github.com/urmd39/product_management/entities"
+	"github.com/urmd39/product_management/model"
 )
 
-// var db *sql.DB
-// var err error
-
 func main() {
-	// infoDB := "host=localhost user=postgres dbname=product_management password=model.kn2412" +
-	// 	" sslmode=disable"
-	// db, err = sql.Open("postgres", infoDB)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// err = db.Ping()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer db.Close()
-	// fmt.Println(ctr.GetProductById(1))
 
 	/// Create routers
 	router := mux.NewRouter()
 
-	// http.HandleFunc("/api/product", apis.GetProduct)
-	router.HandleFunc("/api/product", apis.GetProduct).Methods("GET")
-	// router.HandleFunc("/api/product", createPost).Methods("POST")
-	// router.HandleFunc("/api/product/{id}", getPost).Methods("GET")
-	// router.HandleFunc("/api/product/{id}", updatePost).Methods("PUT")
-	// router.HandleFunc("/api/product/{id}", deletePost).Methods("DELETE")
+	router.HandleFunc("/api/product", getProduct).Methods("GET")
+	router.HandleFunc("/api/product", createProduct).Methods("POST")
+	router.HandleFunc("/api/product/{id}", getProductById).Methods("GET")
+	router.HandleFunc("/api/product/{id}", updateProduct).Methods("PUT")
+	router.HandleFunc("/api/product/{id}", deleteProduct).Methods("DELETE")
 
 	http.Handle("/", router)
 	fmt.Println("Server start at port 8000")
 	http.ListenAndServe(":8000", nil)
+}
+
+func getProduct(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	listProduct := model.GetListProduct()
+	json.NewEncoder(w).Encode(listProduct)
+}
+
+func getProductById(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+
+	id, _ := strconv.Atoi(params["id"])
+
+	fmt.Println(id)
+	pd := model.GetProductById(id)
+	json.NewEncoder(w).Encode(pd)
+}
+
+func createProduct(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	body, _ := ioutil.ReadAll(r.Body)
+	var pd entities.Product
+	json.Unmarshal(body, &pd)
+
+	model.AddProduct(pd)
+	json.NewEncoder(w).Encode(pd)
+}
+
+func deleteProduct(w http.ResponseWriter, r *http.Request) {
+	// w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	id, _ := strconv.Atoi(params["id"])
+	model.Delete_Product(id)
+}
+
+func updateProduct(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+
+	id, _ := strconv.Atoi(params["id"])
+	body, _ := ioutil.ReadAll(r.Body)
+	var pd entities.Product
+	json.Unmarshal(body, &pd)
+	model.Update_Product(id, pd)
+	json.NewEncoder(w).Encode(pd)
 }
