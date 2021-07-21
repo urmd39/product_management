@@ -1,7 +1,6 @@
 package control
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/urmd39/product_management/entities"
@@ -65,7 +64,7 @@ func GetProductById(id int) entities.Product {
 
 	var pd entities.Product
 	for rows.Next() {
-		pd = entities.Product{}
+		// pd = *entities.Product{}
 		query_err := rows.Scan(&pd.Id, &pd.Name, &pd.Currency_unit_id, &pd.Description,
 			&pd.Updated_time, &pd.Purchase_price, &pd.Selling_price)
 		if query_err != nil {
@@ -108,7 +107,6 @@ func Delete_Product(id int) {
 		panic(err)
 	}
 	defer rows.Close()
-	fmt.Println("Deleted")
 }
 
 func FilterProductWithCU(f string) []entities.Product {

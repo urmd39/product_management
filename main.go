@@ -1,89 +1,60 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
-	"strconv"
-	"strings"
 
-	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
-	"github.com/urmd39/product_management/control"
-	"github.com/urmd39/product_management/entities"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/urmd39/product_management/apis"
 )
 
 func main() {
+	r := chi.NewRouter()
+	// r.Use(middleware.RequestID)
+	// r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 
-	/// Create routers
-	router := mux.NewRouter()
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Homepage"))
+	})
 
-	router.HandleFunc("/api/product", CreateProduct).Methods("POST")
-	router.HandleFunc("/api/product/{id}", GetProductById).Methods("GET")
-	router.HandleFunc("/api/product/{id}", UpdateProduct).Methods("PUT")
-	router.HandleFunc("/api/product/{id}", DeleteProduct).Methods("DELETE")
-	router.HandleFunc("/api/product", FilterProductWithCU).
-		Queries("currency_unit", "{currency_unit}").Methods("GET")
-	router.HandleFunc("/api/product", GetProduct).Methods("GET")
+	r.Route("/product", func(r chi.Router) {
+		r.With(paginate).Get("/", apis.GetProducts) // GET /product
+		r.Post("/", apis.CreateProduct)             // POST /articles
+		r.Get("/filter", apis.FilterProductWithCU)
 
-	http.Handle("/", router)
-	fmt.Println("Server start at port 8000")
-	http.ListenAndServe(":8000", nil)
+		r.Route("/{id}", func(r chi.Router) {
+			r.Use(apis.ProductCtx)            // Load the *Article on the request context
+			r.Get("/", apis.GetProductById)   // GET /articles/123
+			r.Put("/", apis.UpdateProduct)    // PUT /articles/123
+			r.Delete("/", apis.DeleteProduct) // DELETE /articles/123
+		})
+
+		// r.Get("/search", searchArticles) // GET /articles/search
+
+		// Regexp url parameters:
+		// r.Get("/{articleSlug:[a-z-]+}", getArticleBySlug) // GET /articles/home-is-toronto
+
+		// Subrouters:
+		// r.Route("/{articleID}", func(r chi.Router) {
+		// 	r.Use(ArticleCtx)
+		// 	r.Get("/", getArticle)       // GET /articles/123
+		// 	r.Put("/", updateArticle)    // PUT /articles/123
+		// 	r.Delete("/", deleteArticle) // DELETE /articles/123
+		// })
+	})
+
+	// Mount the admin sub-router
+	// r.Mount("/admin", adminRouter())
+
+	http.ListenAndServe(":3000", r)
 }
 
-func GetProduct(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	listProduct := control.GetListProduct()
-	json.NewEncoder(w).Encode(listProduct)
-	fmt.Println("Get All")
-}
-
-func GetProductById(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-
-	id, _ := strconv.Atoi(params["id"])
-
-	fmt.Println(id)
-	pd := control.GetProductById(id)
-	json.NewEncoder(w).Encode(pd)
-}
-
-func CreateProduct(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	body, _ := ioutil.ReadAll(r.Body)
-	var pd entities.Product
-	json.Unmarshal(body, &pd)
-
-	control.AddProduct(pd)
-	json.NewEncoder(w).Encode(pd)
-}
-
-func DeleteProduct(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	id, _ := strconv.Atoi(params["id"])
-	control.Delete_Product(id)
-	fmt.Fprintf(w, "Product with id = %d has been deleted!!!/n", id)
-}
-
-func UpdateProduct(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-
-	id, _ := strconv.Atoi(params["id"])
-	body, _ := ioutil.ReadAll(r.Body)
-	var pd entities.Product
-	json.Unmarshal(body, &pd)
-	control.Update_Product(id, pd)
-	json.NewEncoder(w).Encode(pd)
-}
-
-func FilterProductWithCU(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	filter := r.FormValue("currency_unit")
-	listProduct := control.FilterProductWithCU(strings.ToUpper(filter))
-	json.NewEncoder(w).Encode(listProduct)
+func paginate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// just a stub.. some ideas are to look at URL query params for something like
+		// the page number, or the limit, and send a query cursor down the chain
+		next.ServeHTTP(w, r)
+	})
 }
