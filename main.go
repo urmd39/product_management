@@ -10,8 +10,8 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/urmd39/product_management/control"
 	"github.com/urmd39/product_management/entities"
-	"github.com/urmd39/product_management/model"
 )
 
 func main() {
@@ -19,7 +19,6 @@ func main() {
 	/// Create routers
 	router := mux.NewRouter()
 
-	// router.HandleFunc("/api/product", GetProduct).Methods("GET")
 	router.HandleFunc("/api/product", CreateProduct).Methods("POST")
 	router.HandleFunc("/api/product/{id}", GetProductById).Methods("GET")
 	router.HandleFunc("/api/product/{id}", UpdateProduct).Methods("PUT")
@@ -35,7 +34,7 @@ func main() {
 
 func GetProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	listProduct := model.GetListProduct()
+	listProduct := control.GetListProduct()
 	json.NewEncoder(w).Encode(listProduct)
 	fmt.Println("Get All")
 }
@@ -47,7 +46,7 @@ func GetProductById(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(params["id"])
 
 	fmt.Println(id)
-	pd := model.GetProductById(id)
+	pd := control.GetProductById(id)
 	json.NewEncoder(w).Encode(pd)
 }
 
@@ -58,15 +57,15 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	var pd entities.Product
 	json.Unmarshal(body, &pd)
 
-	model.AddProduct(pd)
+	control.AddProduct(pd)
 	json.NewEncoder(w).Encode(pd)
 }
 
 func DeleteProduct(w http.ResponseWriter, r *http.Request) {
-	// w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	id, _ := strconv.Atoi(params["id"])
-	model.Delete_Product(id)
+	control.Delete_Product(id)
 	fmt.Fprintf(w, "Product with id = %d has been deleted!!!/n", id)
 }
 
@@ -78,14 +77,13 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	var pd entities.Product
 	json.Unmarshal(body, &pd)
-	model.Update_Product(id, pd)
+	control.Update_Product(id, pd)
 	json.NewEncoder(w).Encode(pd)
 }
 
 func FilterProductWithCU(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	filter := r.FormValue("currency_unit")
-	listProduct := model.FilterProductWithCU(strings.ToUpper(filter))
-	// fmt.Printf("%T", filter)
+	listProduct := control.FilterProductWithCU(strings.ToUpper(filter))
 	json.NewEncoder(w).Encode(listProduct)
 }

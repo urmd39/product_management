@@ -1,4 +1,4 @@
-package model
+package control
 
 import (
 	"fmt"
@@ -29,7 +29,6 @@ func GetListProduct() []entities.Product {
 		}
 		listProduct = append(listProduct, pd)
 	}
-	// fmt.Println(listProduct)
 	return listProduct
 }
 
@@ -73,7 +72,6 @@ func GetProductById(id int) entities.Product {
 			panic(query_err)
 		}
 	}
-	// fmt.Println(pd)
 	return pd
 }
 
@@ -86,7 +84,6 @@ func Update_Product(id int, pd entities.Product) {
 	if pd_old.Purchase_price != pd.Purchase_price || pd_old.Selling_price != pd.Selling_price {
 		Update_History(id)
 	}
-	// pd_old := GetProductById(id)
 	sql := `UPDATE product
 			SET name = $1, currency_unit_id = $2, description = $3, updated_time = $4, 
 			purchase_price = $5, selling_price = $6
@@ -104,7 +101,6 @@ func Delete_Product(id int) {
 	defer db.Close()
 	db.Exec(`set search_path='product'`)
 
-	// pd_old := GetProductById(id)
 	sql := `DELETE FROM product
 			WHERE id = $1`
 	rows, err := db.Query(sql, id)
