@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -18,24 +19,28 @@ func main() {
 	/// Create routers
 	router := mux.NewRouter()
 
-	router.HandleFunc("/api/product", getProduct).Methods("GET")
-	router.HandleFunc("/api/product", createProduct).Methods("POST")
-	router.HandleFunc("/api/product/{id}", getProductById).Methods("GET")
-	router.HandleFunc("/api/product/{id}", updateProduct).Methods("PUT")
-	router.HandleFunc("/api/product/{id}", deleteProduct).Methods("DELETE")
+	// router.HandleFunc("/api/product", GetProduct).Methods("GET")
+	router.HandleFunc("/api/product", CreateProduct).Methods("POST")
+	router.HandleFunc("/api/product/{id}", GetProductById).Methods("GET")
+	router.HandleFunc("/api/product/{id}", UpdateProduct).Methods("PUT")
+	router.HandleFunc("/api/product/{id}", DeleteProduct).Methods("DELETE")
+	router.HandleFunc("/api/product", FilterProductWithCU).
+		Queries("currency_unit", "{currency_unit}").Methods("GET")
+	router.HandleFunc("/api/product", GetProduct).Methods("GET")
 
 	http.Handle("/", router)
 	fmt.Println("Server start at port 8000")
 	http.ListenAndServe(":8000", nil)
 }
 
-func getProduct(w http.ResponseWriter, r *http.Request) {
+func GetProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	listProduct := model.GetListProduct()
 	json.NewEncoder(w).Encode(listProduct)
+	fmt.Println("Get All")
 }
 
-func getProductById(w http.ResponseWriter, r *http.Request) {
+func GetProductById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 
@@ -46,7 +51,7 @@ func getProductById(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(pd)
 }
 
-func createProduct(w http.ResponseWriter, r *http.Request) {
+func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	body, _ := ioutil.ReadAll(r.Body)
@@ -57,14 +62,15 @@ func createProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(pd)
 }
 
-func deleteProduct(w http.ResponseWriter, r *http.Request) {
+func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	// w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	id, _ := strconv.Atoi(params["id"])
 	model.Delete_Product(id)
+	fmt.Fprintf(w, "Product with id = %d has been deleted!!!/n", id)
 }
 
-func updateProduct(w http.ResponseWriter, r *http.Request) {
+func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 
@@ -74,4 +80,12 @@ func updateProduct(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(body, &pd)
 	model.Update_Product(id, pd)
 	json.NewEncoder(w).Encode(pd)
+}
+
+func FilterProductWithCU(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	filter := r.FormValue("currency_unit")
+	listProduct := model.FilterProductWithCU(strings.ToUpper(filter))
+	// fmt.Printf("%T", filter)
+	json.NewEncoder(w).Encode(listProduct)
 }
