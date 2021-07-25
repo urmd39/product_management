@@ -13,10 +13,6 @@ func Connected() *sql.DB {
 	if err != nil {
 		panic(err)
 	}
-	// else {
-	// 	// fmt.Println(db)
-	// 	fmt.Println("Connected")
-	// }
 
 	err = db.Ping()
 	if err != nil {

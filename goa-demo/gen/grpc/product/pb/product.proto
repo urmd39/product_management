@@ -1,0 +1,132 @@
+// Code generated with goa v3.4.3, DO NOT EDIT.
+//
+// product protocol buffer definition
+//
+// Command:
+// $ goa gen goa-demo/design
+
+syntax = "proto3";
+
+package product;
+
+option go_package = "/productpb";
+
+// The product management service.
+service Product {
+	// GetListProduct implements getListProduct.
+	rpc GetListProduct (GetListProductRequest) returns (StoredProductCollection);
+	// GetProduct implements getProduct.
+	rpc GetProduct (GetProductRequest) returns (GetProductResponse);
+	// FilterProduct implements filterProduct.
+	rpc FilterProduct (FilterProductRequest) returns (StoredProductCollection);
+	// CreateProduct implements createProduct.
+	rpc CreateProduct (CreateProductRequest) returns (CreateProductResponse);
+	// UpdateProduct implements updateProduct.
+	rpc UpdateProduct (UpdateProductRequest) returns (UpdateProductResponse);
+	// Remove product from storage
+	rpc RemoveProduct (RemoveProductRequest) returns (RemoveProductResponse);
+}
+
+message GetListProductRequest {
+}
+
+message StoredProductCollection {
+	repeated StoredProduct field = 1;
+}
+// StoredProduct describes
+message StoredProduct {
+	// ID is the unique id of the bottle.
+	sint32 id = 1;
+	// Name of product
+	string name = 2;
+	string currency_unit = 3;
+	string description = 4;
+	string updated_time = 5;
+	double purchase_price = 6;
+	double selling_price = 7;
+}
+
+message GetProductNotFoundError {
+	// Message of error
+	string message_ = 1;
+	// ID of missing product
+	sint32 id = 2;
+}
+
+message GetProductRequest {
+	// ID of product to show
+	sint32 id = 1;
+}
+
+message GetProductResponse {
+	// ID is the unique id of the bottle.
+	sint32 id = 1;
+	// Name of product
+	string name = 2;
+	string currency_unit = 3;
+	string description = 4;
+	string updated_time = 5;
+	double purchase_price = 6;
+	double selling_price = 7;
+}
+
+message FilterProductNotFoundError {
+	// Message of error
+	string message_ = 1;
+	// ID of missing product
+	sint32 id = 2;
+}
+
+message FilterProductRequest {
+}
+
+message CreateProductRequest {
+	// Name of product
+	string name = 1;
+	string currency_unit = 2;
+	string description = 3;
+	string updated_time = 4;
+	double purchase_price = 5;
+	double selling_price = 6;
+}
+
+message CreateProductResponse {
+	string field = 1;
+}
+
+message UpdateProductRequest {
+	// ID of Product need update
+	sint32 id = 1;
+	// Product Updated
+	Product2 product = 2;
+}
+// Product describes
+message Product2 {
+	// Name of product
+	string name = 1;
+	string currency_unit = 2;
+	string description = 3;
+	string updated_time = 4;
+	double purchase_price = 5;
+	double selling_price = 6;
+}
+
+message UpdateProductResponse {
+	// ID is the unique id of the bottle.
+	sint32 id = 1;
+	// Name of product
+	string name = 2;
+	string currency_unit = 3;
+	string description = 4;
+	string updated_time = 5;
+	double purchase_price = 6;
+	double selling_price = 7;
+}
+
+message RemoveProductRequest {
+	// ID of product to remove
+	sint32 id = 1;
+}
+
+message RemoveProductResponse {
+}

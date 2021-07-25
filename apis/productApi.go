@@ -31,7 +31,6 @@ func GetProductById(w http.ResponseWriter, r *http.Request) {
 
 func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
 	body, _ := ioutil.ReadAll(r.Body)
 	var pd entities.Product
 	json.Unmarshal(body, &pd)
@@ -71,8 +70,6 @@ func FilterProductWithCU(w http.ResponseWriter, r *http.Request) {
 func ProductCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id, _ := strconv.Atoi(chi.URLParam(r, "id"))
-		// product := GetProductById(id)
-
 		ctx := context.WithValue(r.Context(), "product", id)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

@@ -20,29 +20,16 @@ func main() {
 	})
 
 	r.Route("/product", func(r chi.Router) {
-		r.With(paginate).Get("/", apis.GetProducts) // GET /product
-		r.Post("/", apis.CreateProduct)             // POST /articles
+		r.With(paginate).Get("/", apis.GetProducts)
+		r.Post("/", apis.CreateProduct)
 		r.Get("/filter", apis.FilterProductWithCU)
 
 		r.Route("/{id}", func(r chi.Router) {
-			r.Use(apis.ProductCtx)            // Load the *Article on the request context
-			r.Get("/", apis.GetProductById)   // GET /articles/123
-			r.Put("/", apis.UpdateProduct)    // PUT /articles/123
-			r.Delete("/", apis.DeleteProduct) // DELETE /articles/123
+			r.Use(apis.ProductCtx)
+			r.Get("/", apis.GetProductById)
+			r.Put("/", apis.UpdateProduct)
+			r.Delete("/", apis.DeleteProduct)
 		})
-
-		// r.Get("/search", searchArticles) // GET /articles/search
-
-		// Regexp url parameters:
-		// r.Get("/{articleSlug:[a-z-]+}", getArticleBySlug) // GET /articles/home-is-toronto
-
-		// Subrouters:
-		// r.Route("/{articleID}", func(r chi.Router) {
-		// 	r.Use(ArticleCtx)
-		// 	r.Get("/", getArticle)       // GET /articles/123
-		// 	r.Put("/", updateArticle)    // PUT /articles/123
-		// 	r.Delete("/", deleteArticle) // DELETE /articles/123
-		// })
 	})
 
 	// Mount the admin sub-router

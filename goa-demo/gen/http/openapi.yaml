@@ -1,0 +1,487 @@
+swagger: "2.0"
+info:
+  title: Product Management Service
+  description: HTTP service for managing your product
+  version: ""
+host: localhost:8000
+consumes:
+- application/json
+- application/xml
+- application/gob
+produces:
+- application/json
+- application/xml
+- application/gob
+paths:
+  /openapi.json:
+    get:
+      tags:
+      - product
+      summary: Download ./gen/http/openapi.json
+      operationId: product#/openapi.json
+      responses:
+        "200":
+          description: File downloaded
+          schema:
+            type: file
+      schemes:
+      - http
+      - https
+  /product:
+    get:
+      tags:
+      - product
+      summary: getListProduct product
+      operationId: product#getListProduct
+      responses:
+        "200":
+          description: OK response.
+          schema:
+            $ref: '#/definitions/ProductStoredProductResponseCollection'
+      schemes:
+      - http
+    post:
+      tags:
+      - product
+      summary: createProduct product
+      operationId: product#createProduct
+      parameters:
+      - name: CreateProductRequestBody
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/ProductCreateProductRequestBody'
+          required:
+          - name
+          - currency_unit
+          - description
+          - updated_time
+          - purchase_price
+          - selling_price
+      responses:
+        "201":
+          description: Created response.
+          schema:
+            type: string
+      schemes:
+      - http
+  /product/{id}:
+    get:
+      tags:
+      - product
+      summary: getProduct product
+      operationId: product#getProduct
+      parameters:
+      - name: view
+        in: query
+        description: View to render
+        required: false
+        type: string
+        enum:
+        - default
+        - tiny
+      - name: id
+        in: path
+        description: ID of product to show
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK response.
+          schema:
+            $ref: '#/definitions/ProductGetProductResponseBody'
+        "404":
+          description: Not Found response.
+          schema:
+            $ref: '#/definitions/ProductGetProductNotFoundResponseBody'
+            required:
+            - message
+            - id
+      schemes:
+      - http
+    put:
+      tags:
+      - product
+      summary: updateProduct product
+      operationId: product#updateProduct
+      parameters:
+      - name: id
+        in: path
+        description: ID of Product need update
+        required: true
+        type: integer
+      - name: UpdateProductRequestBody
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/ProductUpdateProductRequestBody'
+          required:
+          - product
+      responses:
+        "200":
+          description: OK response.
+          schema:
+            $ref: '#/definitions/ProductUpdateProductResponseBody'
+      schemes:
+      - http
+    delete:
+      tags:
+      - product
+      summary: removeProduct product
+      description: Remove product from storage
+      operationId: product#removeProduct
+      parameters:
+      - name: id
+        in: path
+        description: ID of product to remove
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content response.
+      schemes:
+      - http
+  /product/filter:
+    get:
+      tags:
+      - product
+      summary: filterProduct product
+      operationId: product#filterProduct
+      parameters:
+      - name: currency_unit
+        in: query
+        description: Currency Unit
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK response.
+          schema:
+            $ref: '#/definitions/ProductStoredProductResponseCollection'
+        "404":
+          description: Not Found response.
+          schema:
+            $ref: '#/definitions/ProductFilterProductNotFoundResponseBody'
+            required:
+            - message
+            - id
+      schemes:
+      - http
+definitions:
+  ProductCreateProductRequestBody:
+    title: ProductCreateProductRequestBody
+    type: object
+    properties:
+      currency_unit:
+        type: string
+        example: Harum libero quisquam sed non.
+      description:
+        type: string
+        example: Et illum.
+      name:
+        type: string
+        description: Name of product
+        example: Blue's Cuvee
+        maxLength: 100
+      purchase_price:
+        type: number
+        example: 0.8798280195922299
+        format: double
+      selling_price:
+        type: number
+        example: 0.15390411849147478
+        format: double
+      updated_time:
+        type: string
+        example: Eum est repellendus.
+    example:
+      currency_unit: Quia sint corporis.
+      description: Repudiandae placeat distinctio autem.
+      name: Blue's Cuvee
+      purchase_price: 0.8089635937556839
+      selling_price: 0.23578114395727046
+      updated_time: Qui est ducimus voluptatum quo vitae ut.
+    required:
+    - name
+    - currency_unit
+    - description
+    - updated_time
+    - purchase_price
+    - selling_price
+  ProductFilterProductNotFoundResponseBody:
+    title: ProductFilterProductNotFoundResponseBody
+    type: object
+    properties:
+      id:
+        type: integer
+        description: ID of missing product
+        example: 3951550210951029853
+        format: int64
+      message:
+        type: string
+        description: Message of error
+        example: Product 1 not found
+    description: Product not found!!
+    example:
+      id: 3356747555839090337
+      message: Product 1 not found
+    required:
+    - message
+    - id
+  ProductGetProductNotFoundResponseBody:
+    title: ProductGetProductNotFoundResponseBody
+    type: object
+    properties:
+      id:
+        type: integer
+        description: ID of missing product
+        example: 2120907667428026700
+        format: int64
+      message:
+        type: string
+        description: Message of error
+        example: Product 1 not found
+    description: Product not found!!
+    example:
+      id: 2283753658027722966
+      message: Product 1 not found
+    required:
+    - message
+    - id
+  ProductGetProductResponseBody:
+    title: 'Mediatype identifier: application/goa-demo.product; view=default'
+    type: object
+    properties:
+      currency_unit:
+        type: string
+        example: Enim molestias dolorem esse aperiam dolorem odit.
+      description:
+        type: string
+        example: Voluptatum sunt ut eaque nisi dignissimos eaque.
+      id:
+        type: integer
+        description: ID is the unique id of the bottle.
+        example: 7777027891828422073
+        format: int64
+      name:
+        type: string
+        description: Name of product
+        example: Blue's Cuvee
+        maxLength: 100
+      purchase_price:
+        type: number
+        example: 0.8482235006830531
+        format: double
+      selling_price:
+        type: number
+        example: 0.20210918413004333
+        format: double
+      updated_time:
+        type: string
+        example: Quia et exercitationem totam tempora.
+    description: GetProductResponseBody result type (default view)
+    example:
+      currency_unit: Fugiat molestias placeat enim perspiciatis.
+      description: Occaecati doloremque ut sunt molestiae corrupti aperiam.
+      id: 2144647253704134222
+      name: Blue's Cuvee
+      purchase_price: 0.7626101405304216
+      selling_price: 0.3315036898553537
+      updated_time: Quae aut aut eos.
+    required:
+    - id
+    - name
+    - currency_unit
+    - description
+    - updated_time
+    - purchase_price
+    - selling_price
+  ProductRequestBody:
+    title: ProductRequestBody
+    type: object
+    properties:
+      currency_unit:
+        type: string
+        example: Error dignissimos molestiae laborum.
+      description:
+        type: string
+        example: Similique ut asperiores repudiandae.
+      name:
+        type: string
+        description: Name of product
+        example: Blue's Cuvee
+        maxLength: 100
+      purchase_price:
+        type: number
+        example: 0.40149067557985385
+        format: double
+      selling_price:
+        type: number
+        example: 0.06802540881508808
+        format: double
+      updated_time:
+        type: string
+        example: Officiis vel sit commodi consequuntur.
+    description: Product describes
+    example:
+      currency_unit: Odit autem repellat praesentium aut dolores voluptas.
+      description: Est repudiandae impedit tempore.
+      name: Blue's Cuvee
+      purchase_price: 0.24576572310990183
+      selling_price: 0.462687365183763
+      updated_time: Quo distinctio dolorem quis.
+    required:
+    - name
+    - currency_unit
+    - description
+    - updated_time
+    - purchase_price
+    - selling_price
+  ProductStoredProductResponseCollection:
+    title: 'Mediatype identifier: application/goa-demo.product; type=collection; view=default'
+    type: array
+    items:
+      $ref: '#/definitions/StoredProductResponse'
+    description: GetListProductResponseBody is the result type for an array of StoredProductResponse
+      (default view)
+    example:
+    - currency_unit: Quia culpa velit eveniet sit qui quis.
+      description: Impedit fugiat.
+      id: 6340544568579894211
+      name: Blue's Cuvee
+      purchase_price: 0.320884161304603
+      selling_price: 0.02701726872531664
+      updated_time: Voluptatem voluptas.
+    - currency_unit: Quia culpa velit eveniet sit qui quis.
+      description: Impedit fugiat.
+      id: 6340544568579894211
+      name: Blue's Cuvee
+      purchase_price: 0.320884161304603
+      selling_price: 0.02701726872531664
+      updated_time: Voluptatem voluptas.
+    - currency_unit: Quia culpa velit eveniet sit qui quis.
+      description: Impedit fugiat.
+      id: 6340544568579894211
+      name: Blue's Cuvee
+      purchase_price: 0.320884161304603
+      selling_price: 0.02701726872531664
+      updated_time: Voluptatem voluptas.
+    - currency_unit: Quia culpa velit eveniet sit qui quis.
+      description: Impedit fugiat.
+      id: 6340544568579894211
+      name: Blue's Cuvee
+      purchase_price: 0.320884161304603
+      selling_price: 0.02701726872531664
+      updated_time: Voluptatem voluptas.
+  ProductUpdateProductRequestBody:
+    title: ProductUpdateProductRequestBody
+    type: object
+    properties:
+      product:
+        $ref: '#/definitions/ProductRequestBody'
+    example:
+      product:
+        currency_unit: Possimus earum.
+        description: Ut repudiandae.
+        name: Blue's Cuvee
+        purchase_price: 0.9193737983768083
+        selling_price: 0.8555095810048335
+        updated_time: In non nihil provident qui vel iste.
+    required:
+    - product
+  ProductUpdateProductResponseBody:
+    title: 'Mediatype identifier: application/goa-demo.product; view=default'
+    type: object
+    properties:
+      currency_unit:
+        type: string
+        example: Reiciendis minus consequatur unde dignissimos recusandae.
+      description:
+        type: string
+        example: Quis labore et optio ipsa eligendi.
+      id:
+        type: integer
+        description: ID is the unique id of the bottle.
+        example: 2543688629071615208
+        format: int64
+      name:
+        type: string
+        description: Name of product
+        example: Blue's Cuvee
+        maxLength: 100
+      purchase_price:
+        type: number
+        example: 0.7248590009439996
+        format: double
+      selling_price:
+        type: number
+        example: 0.3213099639537727
+        format: double
+      updated_time:
+        type: string
+        example: Sit facere aperiam.
+    description: UpdateProductResponseBody result type (default view)
+    example:
+      currency_unit: Quia aliquid commodi repellat repudiandae quos.
+      description: Deserunt ut illum sit a.
+      id: 7855710487578735609
+      name: Blue's Cuvee
+      purchase_price: 0.5523552604326036
+      selling_price: 0.465432971523039
+      updated_time: Unde ut officiis.
+    required:
+    - id
+    - name
+    - currency_unit
+    - description
+    - updated_time
+    - purchase_price
+    - selling_price
+  StoredProductResponse:
+    title: 'Mediatype identifier: application/goa-demo.product; view=default'
+    type: object
+    properties:
+      currency_unit:
+        type: string
+        example: Tempore illum.
+      description:
+        type: string
+        example: Eos similique recusandae ipsum sapiente.
+      id:
+        type: integer
+        description: ID is the unique id of the bottle.
+        example: 9063798469094238953
+        format: int64
+      name:
+        type: string
+        description: Name of product
+        example: Blue's Cuvee
+        maxLength: 100
+      purchase_price:
+        type: number
+        example: 0.9569450331482954
+        format: double
+      selling_price:
+        type: number
+        example: 0.9100853396570755
+        format: double
+      updated_time:
+        type: string
+        example: Aut quaerat vel a.
+    description: StoredProduct describes (default view)
+    example:
+      currency_unit: Sunt consequatur quisquam temporibus.
+      description: Blanditiis ut consequuntur nam odit.
+      id: 4552922336460172157
+      name: Blue's Cuvee
+      purchase_price: 0.6189738428559715
+      selling_price: 0.08190529735629998
+      updated_time: Occaecati nihil at totam odio pariatur enim.
+    required:
+    - id
+    - name
+    - currency_unit
+    - description
+    - updated_time
+    - purchase_price
+    - selling_price
